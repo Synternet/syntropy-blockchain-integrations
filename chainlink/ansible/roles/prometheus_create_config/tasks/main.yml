@@ -1,0 +1,4 @@
+- name: create Prometheus configuration file
+  template:
+    src: "templates/prometheus.yml.j2"
+    dest: "/data/prometheus-config/prometheus.yml"

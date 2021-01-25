@@ -1,0 +1,43 @@
+- name: add Hashicorp repo
+  yum_repository:
+    name: hashicorp
+    description: Hashicorp repo
+    baseurl: https://rpm.releases.hashicorp.com/RHEL/$releasever/$basearch/stable
+    gpgcheck: true
+    gpgkey: https://rpm.releases.hashicorp.com/gpg
+  become: yes
+  become_user: root
+- name: install Nomad agent
+  yum:
+    name: nomad
+    state: latest
+  become: yes
+  become_user: root
+- name: add EPEL repo
+  yum:
+    name: ["epel-release", "elrepo-release"]
+    state: latest
+  become: yes
+  become_user: root
+- name: install Yum elrepo plugin
+  yum:
+    name: yum-plugin-elrepo
+    state: latest
+  become: yes
+  become_user: root
+- name: install Wireguard
+  yum:
+    name: ["kmod-wireguard", "wireguard-tools"]
+    state: latest
+  become: yes
+  become_user: root
+- name: copy Nomad certificate authority
+  copy:
+    src: "{{ playbook_dir }}/../nomad-ca/nomad-ca.pem"
+    dest: /etc/nomad.d/
+    owner: nomad
+    group: nomad
+    force: yes
+    mode: 0644
+  become: yes
+  become_user: root

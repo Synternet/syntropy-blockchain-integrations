@@ -1,0 +1,66 @@
+job "chainlink" {
+    datacenters = ["dc1"]
+    type = "service"
+
+    group "chainlink" {
+        count = 1
+
+        restart {
+            attempts = 10
+            delay  = "30s"
+        }
+
+        volume "chainlink-data" {
+            type = "host"
+            read_only = false
+            source = "chainlink-data"
+        }
+
+        task "chainlink" {
+            driver = "docker"
+
+            resources {
+                memory = 2700 
+                cpu = 4750 
+            }
+
+            volume_mount {
+                volume = "chainlink-data"
+                destination = "/chainlink"
+                read_only = false
+            }
+
+            env {
+                SYNTROPY_SERVICE_NAME = "chainlink"
+                ROOT = "/chainlink"
+                LOG_LEVEL = "debug"
+                ETH_CHAIN_ID = "4"
+                MIN_OUTGOING_CONFIRMATIONS = "2"
+                LINK_CONTRACT_ADDRESS = "0x01BE23585060835E02B77ef475b0Cc51aA1e0709"
+                CHAINLINK_TLS_PORT = "0"
+                SECURE_COOKIES = "false"
+                GAS_UPDATER_ENABLED = "true"
+                ALLOW_ORIGINS = "*"
+                ETH_URL = "ws://{{ eth_server_ip }}:8546"
+                DATABASE_URL = "postgresql://chainlink:{{ postgresql_password }}@{{ postgresql_server_ip }}:5432/chainlink?sslmode=disable"
+                DATABASE_TIMEOUT = "0"
+
+            }
+
+            config {
+                image = "smartcontract/chainlink:0.9.4"
+
+                hostname = "chainlink"
+
+                network_mode = "syntropy_network"
+                ipv4_address = "10.44.{{ groups['nomad_clients'].index(groups['chainlink_servers'][0]) }}.2"
+
+                args = [
+                   "local", "n",
+                   "-p", "/chainlink/.password",
+                   "-a", "/chainlink/.api"
+                ]
+            }
+        }
+    }
+}

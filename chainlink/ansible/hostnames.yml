@@ -1,0 +1,50 @@
+- name: set Chainlink hostname
+  hosts: chainlink_servers
+  tasks:
+    - name: set hostname
+      hostname:
+        name: chainlink
+  become: yes
+  become_user: root
+  tags:
+    - hostname
+- name: set Monitoring server hostname
+  hosts: monitoring_servers
+  tasks:
+    - name: set hostname
+      hostname:
+        name: monitoring
+  become: yes
+  become_user: root
+  tags:
+    - hostname
+- name: set Ethereum server hostname
+  hosts: eth_servers
+  tasks:
+    - name: set hostname
+      hostname:
+        name: ethereum
+  become: yes
+  become_user: root
+  tags:
+    - hostname
+- name: set Postgres master server hostname
+  hosts: postgres_master_servers
+  tasks:
+    - name: set hostname
+      hostname:
+        name: postgres_master
+  become: yes
+  become_user: root
+  tags:
+    - hostname
+- name: set Postgres slave server hostname
+  hosts: postgres_slave_servers
+  tasks:
+    - name: set hostname
+      hostname:
+        name: postgres_slave
+  become: yes
+  become_user: root
+  tags:
+    - hostname

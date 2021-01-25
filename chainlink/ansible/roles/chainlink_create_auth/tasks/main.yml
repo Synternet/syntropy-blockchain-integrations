@@ -1,0 +1,10 @@
+- name: include Chainlink vars
+  include_vars:
+    file: "{{ playbook_dir }}/vars/main.yml"
+- name: create Chainlink auth files
+  template:
+    src: "templates/{{ item }}.j2"
+    dest: "/data/chainlink/.{{ item }}"
+  with_items:
+    - api
+    - password

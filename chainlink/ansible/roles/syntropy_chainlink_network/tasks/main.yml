@@ -1,0 +1,22 @@
+- name: Login to the Platform API
+  syntropynet.syntropy.syntropy_login:
+    api_url: "{{ SYNTROPY_CONTROLLER_URL }}"
+    username: "{{ SYNTROPY_USERNAME }}"
+    password: "{{ SYNTROPY_PASSWORD }}"
+  register: api_key
+- name: Create Syntropy Chainlink network
+  syntropynet.syntropy.syntropy_template:
+    api_url: "{{ SYNTROPY_CONTROLLER_URL }}"
+    api_token: "{{ api_key.token }}"
+    template_path: "{{ playbook_dir }}/roles/syntropy_chainlink_network/templates/syntropy_chainlink.yml"
+    template_params:
+      bastion_server: "{{ansible_hostname}}"
+      chainlink_server: "{{ hostvars[groups['chainlink_servers'][0]]['ansible_fqdn'] }}"
+      eth_client_server: "{{ hostvars[groups['eth_servers'][0]]['ansible_fqdn'] }}"
+      postgres_server: "{{ hostvars[groups['postgres_master_servers'][0]]['ansible_fqdn'] }}"
+      postgres_replication_server: "{{ hostvars[groups['postgres_slave_servers'][0]]['ansible_fqdn'] }}"
+      prometheus_server: "{{ hostvars[groups['monitoring_servers'][0]]['ansible_fqdn'] }}"
+  register: result
+  retries: 3
+  until: result is success
+  delay: 10

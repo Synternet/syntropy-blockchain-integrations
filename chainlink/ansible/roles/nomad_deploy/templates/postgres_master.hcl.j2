@@ -1,0 +1,73 @@
+job "postgres-master" {
+    datacenters = ["dc1"]
+    type = "service"
+
+    group "postgres-master" {
+        count = 1
+
+        restart {
+            attempts = 10
+            delay  = "30s"
+        }
+
+        volume "postgres-master-data" {
+            type = "host"
+            read_only = false
+            source = "postgres-master-data"
+        }
+
+        task "postgres-master" {
+            driver = "docker"
+
+            resources {
+                memory = 768 
+                cpu = 1500
+            }
+
+            env {
+                SYNTROPY_SERVICE_NAME = "postgres_master"
+                POSTGRESQL_USERNAME="chainlink"
+                POSTGRESQL_PASSWORD="{{ POSTGRESQL_PASSWORD }}"
+                POSTGRESQL_DATABASE="chainlink"
+                POSTGRESQL_REPLICATION_MODE="master"
+                POSTGRESQL_REPLICATION_USER="chainlink_repl"
+                POSTGRESQL_REPLICATION_PASSWORD="{{ POSTGRESQL_PASSWORD }}"
+            }
+
+            volume_mount {
+                volume = "postgres-master-data"
+                destination = "/bitnami/postgresql"
+                read_only = false
+            }
+
+            config {
+                image = "bitnami/postgresql:latest"
+
+                network_mode = "syntropy_network"
+                network_aliases = [
+                    "postgres-master"
+                ]
+                ipv4_address = "10.44.{{ groups['nomad_clients'].index(groups['postgres_master_servers'][0]) }}.2"
+            }
+        }
+
+        task "postgres-master-exporter" {
+            driver = "docker"
+
+            env {
+                SYNTROPY_SERVICE_NAME = "postgres_master_exporter"
+                DATA_SOURCE_NAME = "postgresql://chainlink:{{ POSTGRESQL_PASSWORD }}@postgres-master:5432/postgres?sslmode=disable"
+                PG_EXPORTER_WEB_LISTEN_ADDRESS = ":9090"
+            }
+
+            config {
+                image = "wrouesnel/postgres_exporter:latest"
+                network_mode = "syntropy_network"
+                network_aliases = [
+                    "postgres-master-exporter"
+                ]
+                ipv4_address = "10.44.{{ groups['nomad_clients'].index(groups['postgres_master_servers'][0]) }}.3"
+            }
+        }
+    }
+}

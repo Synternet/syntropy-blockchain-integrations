@@ -1,0 +1,86 @@
+job "eth-client" {
+    datacenters = ["dc1"]
+    type = "service"
+
+    group "eth-client" {
+        count = 1
+
+        restart {
+            attempts = 100
+            delay  = "18s"
+        }
+
+        volume "eth-data" {
+            type = "host"
+            read_only = false
+            source = "eth-data"
+        }
+
+        task "eth-client" {
+            driver = "docker"
+
+            resources {
+                memory = 2500 
+                cpu = 4750 
+            }
+
+            volume_mount {
+                volume = "eth-data"
+                destination = "/geth"
+                read_only = false
+            }
+
+            env {
+                SYNTROPY_SERVICE_NAME = "eth_client"
+            }
+
+            config {
+                image = "ethereum/client-go:v1.9.25"
+
+                hostname = "eth-client.chainlink"
+
+                network_mode = "syntropy_network"
+                network_aliases = [
+                    "eth-client"
+                ]
+                ipv4_address = "10.44.{{ groups['nomad_clients'].index(groups['eth_servers'][0]) }}.2"
+
+                labels {
+                    name = "eth-client.chainlink"
+                }
+                
+                args = [
+                    "--rinkeby",
+                    "--ws",
+                    "--ipcdisable",
+                    "--ws.addr", "0.0.0.0",
+                    "--ws.origins=\"*\"",
+                    "--http",
+                    "--http.addr", "10.44.{{ groups['nomad_clients'].index(groups['eth_servers'][0]) }}.2",
+                    "--http.api", "eth,net,web3,admin,personal",
+                    "--http.vhosts", "*",
+                    "--datadir", "/geth",
+                    "--syncmode", "light",
+                ]
+            }
+        }
+
+        task "eth-exporter" {
+            driver = "docker"
+
+            env {
+                SYNTROPY_SERVICE_NAME = "eth_exporter"
+                GETH="http://eth-client:8545"
+            }
+
+            config {
+                image = "hunterlong/gethexporter:latest"
+                network_mode = "syntropy_network"
+                network_aliases = [
+                    "eth-exporter"
+                ]
+                ipv4_address = "10.44.{{ groups['nomad_clients'].index(groups['eth_servers'][0]) }}.3"
+            }
+        }
+    }
+}

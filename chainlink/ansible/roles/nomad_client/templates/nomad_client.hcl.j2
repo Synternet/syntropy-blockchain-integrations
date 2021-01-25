@@ -1,0 +1,40 @@
+# Full configuration options can be found at https://www.nomadproject.io/docs/configuration
+
+data_dir = "/opt/nomad/data"
+bind_addr = "0.0.0.0"
+
+server {
+  enabled = false
+  bootstrap_expect = 1
+}
+
+client {
+  enabled = true
+  servers = ["{{ nomad_ip }}"]
+}
+
+tls {
+  http = true
+  rpc = true
+  
+  ca_file = "/etc/nomad.d/nomad-ca.pem"
+  cert_file = "/etc/nomad.d/nomad-client.pem"
+  key_file = "/etc/nomad.d/nomad-client-key.pem"
+
+  verify_server_hostname = true
+  verify_https_client    = true
+}
+
+plugin "docker" {
+  config {
+    endpoint = "unix:///var/run/docker.sock"
+    
+    allow_caps = ["NET_ADMIN", "SYS_MODULE", "CHOWN", "DAC_OVERRIDE", "FSETID", 
+                  "FOWNER", "MKNOD", "NET_RAW", "SETGID", "SETUID", "SETFCAP",
+                  "SETPCAP", "NET_BIND_SERVICE", "SYS_CHROOT", "KILL", 
+                  "AUDIT_WRITE"]
+    volumes {
+      enabled = true
+    }
+  }
+}

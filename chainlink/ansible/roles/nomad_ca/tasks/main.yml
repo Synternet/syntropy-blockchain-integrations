@@ -1,0 +1,43 @@
+- name: Create Nomad certificate directory
+  file:
+    path: "{{ playbook_dir }}/../nomad-ca"
+    state: "directory"
+- name: Get default CFSSL CA settings
+  get_url:
+    url: "https://raw.githubusercontent.com/hashicorp/nomad/master/demo/vagrant/cfssl.json"
+    dest: "{{ playbook_dir }}/../nomad-ca/cfssl.json"
+- name: Generate Nomad certificate authority and priv key
+  shell: >
+    set -o errexit; \
+    set -o pipefail; \
+    cfssl print-defaults csr \
+    | cfssl gencert -initca - \
+    | cfssljson -bare nomad-ca
+  args:
+    executable: "/bin/bash"
+    chdir: "{{ playbook_dir }}/../nomad-ca"
+    creates: "{{ playbook_dir }}/../nomad-ca/nomad-ca-key.pem"
+- name: Generate Nomad server certificate
+  shell: >
+    set -o errexit; \
+    set -o pipefail; \
+    echo '{}' \
+    | cfssl gencert -ca=nomad-ca.pem -ca-key=nomad-ca-key.pem \
+    -config=cfssl.json -hostname="server.global.nomad,localhost,127.0.0.1" - \
+    | cfssljson -bare nomad-server
+  args:
+    executable: "/bin/bash"
+    chdir: "{{ playbook_dir }}/../nomad-ca"
+    creates: "{{ playbook_dir }}/../nomad-ca/nomad-server*"
+- name: Generate Nomad client certificate
+  shell: >
+    set -o errexit; \
+    set -o pipefail; \
+    echo '{}' \
+    | cfssl gencert -ca=nomad-ca.pem -ca-key=nomad-ca-key.pem \
+    -config=cfssl.json -hostname="client.global.nomad,localhost,127.0.0.1" - \
+    | cfssljson -bare nomad-client
+  args:
+    executable: "/bin/bash"
+    chdir: "{{ playbook_dir }}/../nomad-ca"
+    creates: "{{ playbook_dir }}/../nomad-ca/nomad-client*"

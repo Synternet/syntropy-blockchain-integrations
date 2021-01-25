@@ -1,0 +1,34 @@
+[common]
+${nomad_server_ip} ansible_user=centos
+%{ for ip in nomad_client_ips ~}
+${ip} ansible_user=centos
+%{ endfor ~}
+
+[nomad]
+${nomad_server_ip} ansible_user=centos
+%{ for ip in nomad_client_ips ~}
+${ip} ansible_user=centos
+%{ endfor ~}
+
+[nomad_servers]
+${nomad_server_ip} ansible_user=centos
+
+[nomad_clients]
+%{ for ip in nomad_client_ips ~}
+${ip} ansible_user=centos
+%{ endfor ~}
+
+[eth_servers]
+${nomad_client_ips[0]} ansible_user=centos
+
+[postgres_master_servers]
+${nomad_client_ips[1]} ansible_user=centos
+
+[postgres_slave_servers]
+${nomad_client_ips[2]} ansible_user=centos
+
+[chainlink_servers]
+${nomad_client_ips[3]} ansible_user=centos
+
+[monitoring_servers]
+${nomad_client_ips[4]} ansible_user=centos

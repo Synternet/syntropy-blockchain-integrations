@@ -1,0 +1,19 @@
+- name: Create folders
+  file:
+    path: "/data/grafana-config/{{item}}"
+    state: directory
+  with_items:
+    - "dashboards"
+    - "datasources"
+- name: Copy Grafana datasource
+  copy:
+    src: files/prometheus_datasource.yml
+    dest: /data/grafana-config/datasources/datasource.yml
+- name: Copy Grafana providers
+  copy:
+    src: files/dashboard.yml
+    dest: /data/grafana-config/dashboards/dashboard.yml
+- name: Copy Grafana dashboard
+  copy:
+    src: files/chainlink_dashboard.json
+    dest: /data/grafana-config/dashboards/chainlink_dashboard.json

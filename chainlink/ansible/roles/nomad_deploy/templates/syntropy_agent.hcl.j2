@@ -1,0 +1,57 @@
+job "syntropy-agent" {
+    datacenters = ["dc1"]
+    type = "system"
+
+    group "syntropy-agent" {
+        count = 1
+
+        restart {
+            attempts = 10
+            delay  = "30s"
+        }
+
+        task "syntropy-agent" {
+            driver = "docker"
+
+            resources {
+                memory = 768 
+            }
+
+            env {
+                SYNTROPY_API_KEY = "{{ SYNTROPY_AGENT_API_KEY }}"
+                SYNTROPY_CONTROLLER_URL = "controller-prod-platform-agents.noia.network"
+                SYNTROPY_NETWORK_API = "docker"
+                SYNTROPY_LOG_LEVEL = 10
+            }
+
+            config {
+                image = "syntropynet/agent:latest"
+
+                network_mode = "host"
+                
+                mounts = [
+                    {
+                        type = "bind"
+                        target = "/var/run/docker.sock"
+                        source = "/var/run/docker.sock"
+                        readonly = true
+                    }
+                ]
+
+                devices = [
+                    {
+                        host_path = "/dev/net/tun",
+                        container_path = "/dev/net/tun"
+                    }
+                ]
+
+                cap_add = [
+                    "NET_ADMIN", "SYS_MODULE", "CHOWN", "DAC_OVERRIDE", 
+                    "FSETID", "FOWNER", "MKNOD", "NET_RAW", "SETGID", "SETUID", 
+                    "SETFCAP", "SETPCAP", "NET_BIND_SERVICE", "SYS_CHROOT", 
+                    "KILL", "AUDIT_WRITE"
+                ]
+            }
+        }
+    }
+}

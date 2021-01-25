@@ -1,0 +1,29 @@
+- name: "create temp file for Nomad job {{ nomad_job_name }}"
+  tempfile:
+    state: file
+    suffix: hcl
+  register: temp_job_file
+- name: "insert Nomad server into hosts file"
+  lineinfile:
+    dest: /etc/hosts
+    regexp: '.*server.global.nomad$'
+    line: "{{ groups['nomad_servers'][0] }} server.global.nomad"
+    state: present
+  become: yes
+  become_user: root
+- name: "insert Syntropy API token into Nomad job {{ nomad_job_name }}"
+  template:
+    src: "templates/{{ nomad_job_name }}.hcl.j2"
+    dest: "{{ temp_job_file.path }}"
+- name: "launch Nomad job {{ nomad_job_name }}"
+  shell:
+    "nomad job run {{ temp_job_file.path }}"
+  environment:
+    NOMAD_ADDR: "https://server.global.nomad:4646"
+    NOMAD_CACERT: "{{ playbook_dir }}/../nomad-ca/nomad-ca.pem"
+    NOMAD_CLIENT_CERT: "{{ playbook_dir }}/../nomad-ca/nomad-client.pem"
+    NOMAD_CLIENT_KEY: "{{ playbook_dir }}/../nomad-ca/nomad-client-key.pem"
+  retries: 5
+  delay: 5
+  register: result
+  until: result.rc == 0

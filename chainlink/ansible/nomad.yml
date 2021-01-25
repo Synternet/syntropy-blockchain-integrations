@@ -1,0 +1,45 @@
+- name: wait for instances to start up
+  hosts: common
+  gather_facts: no
+  tasks:
+    - wait_for_connection:
+- name: gather all facts
+  hosts: common
+  tasks: []
+- name: setup Nomad certificate authority and certificates
+  hosts: localhost
+  roles:
+    - andrewrothstein.cfssl
+    - nomad_ca
+- name: install and setup Nomad nodes
+  hosts: nomad
+  roles:
+    - docker
+    - nomad_common
+- import_playbook: hostnames.yml
+- name: setup networking
+  hosts: nomad_clients
+  tasks:
+    - name: create Docker network
+      shell: "docker network create --subnet=10.44.{{ groups['nomad_clients'].index(inventory_hostname) }}.0/24 syntropy_network"
+      register: result
+      retries: 5
+      delay: 60
+      until: "not 'permission denied' in result.stderr"
+  ignore_errors: true
+- name: mount Nomad data volumes
+  hosts: nomad_clients
+  roles:
+    - aws_mount
+- name: setup Nomad servers
+  hosts: nomad_servers
+  roles:
+    - nomad_server
+- name: setup Nomad clients
+  hosts: nomad_clients
+  roles:
+    - role: nomad_client
+      vars:
+        nomad_ip: "{{ groups['nomad_servers'][0] }}"
+- import_playbook: volumes.yml
+- import_playbook: deploy.yml

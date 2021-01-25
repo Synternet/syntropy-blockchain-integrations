@@ -1,0 +1,25 @@
+# Full configuration options can be found at https://www.nomadproject.io/docs/configuration
+
+data_dir = "/opt/nomad/data"
+bind_addr = "0.0.0.0"
+
+server {
+  enabled = true
+  bootstrap_expect = 1
+}
+
+client {
+  enabled = false 
+}
+
+tls {
+  http = true
+  rpc = true
+  
+  ca_file = "/etc/nomad.d/nomad-ca.pem"
+  cert_file = "/etc/nomad.d/nomad-server.pem"
+  key_file = "/etc/nomad.d/nomad-server-key.pem"
+
+  verify_server_hostname = true
+  verify_https_client    = true
+}

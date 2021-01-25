@@ -1,0 +1,28 @@
+- name: "create {{ volume_name }} data volume"
+  file:
+    path: "/data/{{ volume_name }}"
+    state: directory
+    owner: nomad
+    group: nomad
+    mode: 0777 
+  become: yes
+  become_user: root
+- name: "add {{ volume_name }} data Nomad host_volume"
+  template:
+    src: "templates/volume.hcl"
+    dest: "/etc/nomad.d/nomad-{{ volume_name }}.hcl"
+    owner: nomad
+    group: nomad
+    force: yes
+    mode: 0644
+  become: yes
+  become_user: root
+  register: copy_nomad_config
+- name: restart Nomad service
+  systemd:
+    name: nomad
+    state: restarted
+    enabled: yes
+  become: yes
+  become_user: root
+  when: copy_nomad_config.changed

@@ -1,0 +1,98 @@
+job "monitoring" {
+  datacenters = ["dc1"]
+  type        = "service"
+
+  group "monitoring" {
+    count = 1
+
+    restart {
+      attempts = 2
+      interval = "30m"
+      delay    = "15s"
+      mode     = "fail"
+    }
+
+    volume "prometheus-data" {
+      type = "host"
+      read_only = false
+      source = "prometheus-data"
+    }
+
+    volume "prometheus-config-data" {
+      type = "host"
+      read_only = false
+      source = "prometheus-config-data"
+    }
+
+    volume "grafana-data" {
+      type = "host"
+      read_only = false
+      source = "grafana-data"
+    }
+
+    volume "grafana-config-data" {
+      type = "host"
+      read_only = false
+      source = "grafana-config-data"
+    }
+
+    task "prometheus" {
+      driver = "docker"
+      
+      volume_mount {
+        volume = "prometheus-data"
+        destination = "/opt/bitnami/prometheus/data"
+        read_only = false
+      }
+
+      volume_mount {
+        volume = "prometheus-config-data"
+        destination = "/etc/prometheus/"
+        read_only = false
+      }
+
+      env {
+        SYNTROPY_SERVICE_NAME = "prometheus"
+      }
+
+      config {
+        image = "bitnami/prometheus:latest"
+
+        network_mode = "syntropy_network"
+        network_aliases = [
+          "prometheus"
+        ]
+        ipv4_address = "10.44.{{ groups['nomad_clients'].index(groups['monitoring_servers'][0]) }}.2"
+      }
+    }
+
+    task "grafana" {
+      driver = "docker"
+
+      volume_mount {
+        volume = "grafana-data"
+        destination = "/opt/bitnami/grafana/data/"
+        read_only = false
+      }
+
+      volume_mount {
+        volume = "grafana-config-data"
+        destination = "/opt/bitnami/grafana/conf/provisioning/"
+        read_only = false
+      }
+
+      env {
+        SYNTROPY_SERVICE_NAME = "grafana"
+      }
+
+      config { 
+        image = "bitnami/grafana:latest"
+        network_mode = "syntropy_network"
+        network_aliases = [
+          "grafana"
+        ]
+        ipv4_address = "10.44.{{ groups['nomad_clients'].index(groups['monitoring_servers'][0]) }}.3"
+      }
+    }
+  }
+}

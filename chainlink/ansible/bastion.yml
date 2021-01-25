@@ -1,0 +1,56 @@
+- name: get username
+  hosts: localhost
+  connection: local
+  tasks:
+    - name: Run whoami without become.
+      command: whoami
+      changed_when: false
+      become: false
+      register: whoami
+
+    - name: Set a fact with the user name.
+      set_fact:
+        login_user: "{{ whoami.stdout }}"
+  tags:
+    - deploy
+
+- name: install Docker
+  hosts: localhost
+  connection: local
+  tasks:
+    - name: install package
+      package:
+        name: docker
+        state: present
+    - name: enable and start Docker systemd service
+      systemd:
+        name: docker
+        state: started
+        enabled: yes
+    - name: add user to Docker group
+      user:
+        name: "{{ login_user }}"
+        groups: docker
+        append: true
+  become: yes
+  become_user: root
+  tags:
+    - deploy
+
+- name: run Syntropy agent on bastion
+  hosts: localhost
+  connection: local
+  tasks:
+    - name: stop and remove agent
+      shell: "docker stop syntropy-agent && docker rm syntropy-agent"
+    - name: stop and remove CoreDNS
+      shell: "docker stop coredns && docker rm coredns"
+    - name: run agent
+      shell: 'docker run --network="host" --restart=on-failure:10 --cap-add=NET_ADMIN --cap-add=SYS_MODULE -v /var/run/docker.sock:/var/run/docker.sock:ro --device /dev/net/tun:/dev/net/tun --name=syntropy-agent -e SYNTROPY_NETWORK_API="docker" -e SYNTROPY_API_KEY={{ SYNTROPY_AGENT_API_KEY }} -e SYNTROPY_LOG_LEVEL=10 -d syntropynet/agent:latest'
+    - name: run CoreDNS
+      shell: 'docker run --name=coredns --network="host" -d -e SYNTROPY_CONTROLLER_URL="{{ SYNTROPY_CONTROLLER_URL }}" -e SYNTROPY_USERNAME={{SYNTROPY_USERNAME}} -e SYNTROPY_PASSWORD="{{SYNTROPY_PASSWORD}}" -e LOCAL_CACHE_DURATION="30s" -p 53:53 syntropynet/coredns'
+  ignore_errors: true
+  vars_files:
+    - "vars/main.yml"
+  tags:
+    - deploy

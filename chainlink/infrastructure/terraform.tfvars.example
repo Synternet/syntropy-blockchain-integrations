@@ -1,0 +1,3 @@
+ec2_ssh_public_key_file = "~/.ssh/id_rsa.pub"
+ec2_keypair_name    = "chainlink"
+ec2_image_id = "ami-04f5641b0d178a27a"

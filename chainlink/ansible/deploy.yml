@@ -1,0 +1,74 @@
+- import_playbook: bastion.yml
+- name: configure Nomad systemd service
+  hosts: nomad
+  tasks:
+    - name: enable and restart Nomad systemd service
+      systemd:
+        name: nomad
+        state: restarted
+        enabled: yes
+      become: yes
+      become_user: root
+- name: start Nomad jobs
+  hosts: localhost
+  tasks:
+    - name: "start Nomad {{ item }} job"
+      with_items:
+        - syntropy_agent
+        - eth_client
+        - postgres_master
+        - postgres_slave
+        - monitoring
+      include_role:
+        name: nomad_deploy
+      vars:
+        - nomad_job_name: "{{ item }}"
+  vars_files:
+    - "vars/main.yml"
+  tags:
+    - deploy
+- name: deploy Chainlink
+  hosts: localhost
+  tasks:
+    - name: "start Nomad Chainlink job"
+      include_role:
+        name: nomad_deploy
+      vars:
+        - nomad_job_name: "chainlink"
+        - eth_server_ip: "10.44.{{ groups['nomad_clients'].index(groups['eth_servers'][0]) }}.2"
+        - postgresql_server_ip: "10.44.{{ groups['nomad_clients'].index(groups['postgres_master_servers'][0]) }}.2"
+        - postgresql_password: "{{ POSTGRESQL_PASSWORD }}"
+  vars_files:
+    - "vars/main.yml"
+  tags:
+    - deploy
+- name: wait for Syntropy services
+  hosts: localhost
+  tasks:
+    - name: Login to the Platform API
+      syntropynet.syntropy.syntropy_login:
+        api_url: "{{ SYNTROPY_CONTROLLER_URL }}"
+        username: "{{ SYNTROPY_USERNAME }}"
+        password: "{{ SYNTROPY_PASSWORD }}"
+      register: api_key
+    - name: gather facts
+      syntropynet.syntropy.syntropy_facts:
+        api_url: "{{ SYNTROPY_CONTROLLER_URL }}"
+        api_token: "{{ api_key.token }}"
+        gather_subset: ["endpoints"]
+      register: syntropy_facts
+      until: (syntropy_facts.facts | community.general.json_query('endpoints[? agent_is_online][].agent_services[? agent_service_is_active && (agent_service_name == `eth_client` || agent_service_name == `eth_exporter` || agent_service_name == `postgres_master` || agent_service_name == `postgres_slave` || agent_service_name == `prometheus` || agent_service_name == `grafana` || agent_service_name == `postgres_master_exporter` || agent_service_name == `postgres_slave_exporter` || agent_service_name == `chainlink` ) ][]') | length == 9)
+      retries: 50
+      delay: 5
+  vars_files:
+    - "vars/main.yml"
+  tags:
+    - deploy
+- name: create Syntropy Chainlink network
+  hosts: localhost
+  roles:
+    - syntropy_chainlink_network
+  vars_files:
+    - "vars/main.yml"
+  tags:
+    - deploy

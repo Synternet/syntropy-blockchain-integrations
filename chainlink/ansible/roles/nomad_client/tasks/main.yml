@@ -1,0 +1,32 @@
+- name: copy Nomad client configuration
+  template:
+    src: nomad_client.hcl.j2
+    dest: /etc/nomad.d/nomad.hcl
+    owner: nomad
+    group: nomad
+    force: yes
+    mode: 0644
+  become: yes
+  become_user: root
+- name: copy Nomad client certificates
+  copy: 
+    src: "{{ item }}"
+    dest: /etc/nomad.d/
+    owner: nomad
+    group: nomad
+    force: yes
+    mode: 0644
+  with_fileglob:
+    - "{{ playbook_dir }}/../nomad-ca/nomad-client*"
+  become: yes
+  become_user: root
+- name: copy Nomad certificate authority
+  copy: 
+    src: ../nomad-ca/nomad-ca.pem
+    dest: /etc/nomad.d/
+    owner: nomad
+    group: nomad
+    force: yes
+    mode: 0644
+  become: yes
+  become_user: root

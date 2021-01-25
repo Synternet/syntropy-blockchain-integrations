@@ -1,0 +1,38 @@
+- name: "create mount path on /data"
+  file:
+    state: "directory"
+    path: "/data"
+  become: yes
+  become_user: root
+- name: "create partition on /dev/nvme1n1"
+  parted:
+    device: "/dev/nvme1n1"
+    number: 1
+    label: "gpt"
+    part_start: "0%"
+    part_end: "100%"
+    name: "data"
+    state: "present"
+  register: create_partition
+  ignore_errors: yes
+  become: yes
+  become_user: root
+- name: "format partition on /dev/nvme1n1"
+  filesystem:
+    dev: "/dev/nvme1n1"
+    fstype: "ext4"
+  when: create_partition.changed
+  become: yes
+  become_user: root
+- name: "rediscover facts for /dev/nvme1n1"
+  setup: {}
+  become: yes
+  become_user: root
+- name: "mount the partition for /dev/nvme1n1"
+  mount:
+    path: "/data"
+    src: "/dev/nvme1n1"
+    fstype: "ext4"
+    state: "mounted"
+  become: yes
+  become_user: root

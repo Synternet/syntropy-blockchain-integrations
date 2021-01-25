@@ -1,0 +1,64 @@
+---
+name: syntropy_chainlink
+state: present
+topology: p2m
+connections:
+  {{ chainlink_server }}:
+    connect_to:
+      {{ eth_client_server }}:
+        type: endpoint
+        services:
+          - eth_client
+      {{ postgres_server }}:
+        type: endpoint
+        services:
+          - postgres_master
+    state: present
+    type: endpoint
+    services:
+      - chainlink
+  {{ prometheus_server }}:
+    connect_to:
+      {{ eth_client_server }}:
+        type: endpoint
+        services:
+          - eth_exporter
+      {{ postgres_server }}:
+        type: endpoint
+        services:
+          - postgres_master_exporter
+      {{ postgres_replication_server }}:
+        type: endpoint
+        services:
+          - postgres_slave_exporter
+      {{ chainlink_server }}:
+        type: endpoint
+        services:
+          - chainlink
+    state: present
+    type: endpoint
+    services:
+      - prometheus
+  {{ postgres_replication_server }}:
+    connect_to:
+      {{ postgres_server }}:
+        type: endpoint
+        services:
+          - postgres_master
+    state: present
+    type: endpoint
+    services:
+      - postgres_slave
+  {{ bastion_server }}:
+    connect_to:
+      {{ chainlink_server }}:
+        type: endpoint
+        services:
+          - chainlink
+      {{ prometheus_server }}:
+        type: endpoint
+        services:
+          - prometheus
+          - grafana
+    state: present
+    type: endpoint

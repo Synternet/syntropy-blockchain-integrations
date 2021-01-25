@@ -1,0 +1,25 @@
+- name: copy Nomad server configuration
+  template:
+      src: nomad_server.hcl.j2
+      dest: /etc/nomad.d/nomad.hcl
+      owner: nomad
+      group: nomad
+      force: yes
+      mode: 0644
+  become: yes
+  become_user: root
+- name: copy Nomad server certificates
+  copy: 
+    src: "{{ item }}"
+    dest: /etc/nomad.d/
+    owner: nomad
+    group: nomad
+    force: yes
+    mode: 0644
+  with_fileglob:
+    - "{{ playbook_dir }}/../nomad-ca/nomad-server*"
+  become: yes
+  become_user: root
+- name: save Nomad server internal IP
+  shell: hostname -I | cut -d " " -f1
+  register: nomad_server_ip

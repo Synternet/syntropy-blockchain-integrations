@@ -1,0 +1,52 @@
+- name: setup Nomad ethereum volume configuration
+  hosts: eth_servers
+  roles:
+    - role: nomad_volume
+      vars:
+        volume_name: eth
+  tags:
+    - volume
+- name: setup Nomad PostgreSQL volume configuration
+  hosts: postgres_master_servers
+  roles:
+    - role: nomad_volume
+      vars:
+        volume_name: postgres-master
+  tags:
+    - volume
+- name: setup Nomad PostgreSQL volume configuration
+  hosts: postgres_slave_servers
+  roles:
+    - role: nomad_volume
+      vars:
+        volume_name: postgres-slave
+  tags:
+    - volume
+- name: setup Nomad Prometheus volume configuration
+  hosts: monitoring_servers
+  roles:
+    - role: nomad_volume
+      vars:
+        volume_name: "prometheus" 
+    - role: nomad_volume
+      vars:
+        volume_name: "prometheus-config" 
+    - role: nomad_volume
+      vars:
+        volume_name: "grafana"
+    - role: nomad_volume
+      vars:
+        volume_name: "grafana-config"
+    - role: prometheus_create_config
+    - role: grafana_create_config
+  tags:
+    - volume
+- name: setup Nomad Chainlink configuration
+  hosts: chainlink_servers
+  roles:
+    - role: nomad_volume
+      vars:
+        volume_name: chainlink
+    - role: chainlink_create_auth
+  tags:
+    - volume
