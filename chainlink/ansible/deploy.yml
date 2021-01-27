@@ -51,19 +51,26 @@
         username: "{{ SYNTROPY_USERNAME }}"
         password: "{{ SYNTROPY_PASSWORD }}"
       register: api_key
+    - name: debug api
+      debug:
+        var: api_key
     - name: gather facts
       syntropynet.syntropy.syntropy_facts:
         api_url: "{{ SYNTROPY_CONTROLLER_URL }}"
         api_token: "{{ api_key.token }}"
         gather_subset: ["endpoints"]
-      register: syntropy_facts
-      until: (syntropy_facts.facts | community.general.json_query('endpoints[? agent_is_online][].agent_services[? agent_service_is_active && (agent_service_name == `eth_client` || agent_service_name == `eth_exporter` || agent_service_name == `postgres_master` || agent_service_name == `postgres_slave` || agent_service_name == `prometheus` || agent_service_name == `grafana` || agent_service_name == `postgres_master_exporter` || agent_service_name == `postgres_slave_exporter` || agent_service_name == `chainlink` ) ][]') | length == 9)
+      register: service_facts
+      until: (service_facts | community.general.json_query('endpoints[? agent_is_online][].agent_services[? agent_service_is_active && (agent_service_name == `eth_client` || agent_service_name == `eth_exporter` || agent_service_name == `postgres_master` || agent_service_name == `postgres_slave` || agent_service_name == `prometheus` || agent_service_name == `grafana` || agent_service_name == `postgres_master_exporter` || agent_service_name == `postgres_slave_exporter` || agent_service_name == `chainlink` ) ][]') | length == 9)
       retries: 50
       delay: 5
+    - name: debug
+      debug:
+        var: service_facts
   vars_files:
     - "vars/main.yml"
   tags:
     - deploy
+    - network
 - name: create Syntropy Chainlink network
   hosts: localhost
   roles:
@@ -72,3 +79,4 @@
     - "vars/main.yml"
   tags:
     - deploy
+    - network
