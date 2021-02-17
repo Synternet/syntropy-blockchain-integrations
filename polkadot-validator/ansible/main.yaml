@@ -15,4 +15,4 @@
   import_playbook: deploy_monitoring.yaml
 
 - name: Create Syntropy Network
-  import_playbook: deploy_monitoring.yaml
+  import_playbook: deploy_network.yaml
