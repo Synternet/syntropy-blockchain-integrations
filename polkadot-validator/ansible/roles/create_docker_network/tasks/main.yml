@@ -9,5 +9,5 @@
     driver: bridge
     ipam_config:
       - subnet: "{{subnet}}"
-    retries: 2
-    delay: 10
+  retries: 2
+  delay: 10
