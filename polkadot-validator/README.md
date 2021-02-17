@@ -1,6 +1,6 @@
 ![header](images/header.jpg)
 
-# Deplopy a Polkadot Validator Node with monitoring using Syntropy
+# Deploy a Polkadot Validator Node with monitoring using Syntropy
 
 Security is paramount when running a validator node. For this reason, the Polkadot documentation recommends following the [secure validator setup guide](https://github.com/w3f/polkadot-secure-validator) to set up a node. This repo follows the same approach, but has been customized to isolate every service inside a docker container and uses the Syntropy Stack to securely connect the Validator to the monitoring infrastructure. This guide deals exclusively with creating the infrastructure and bringing the node online, it does not cover Polkadot-specific details such as setting Session Keys, network validation, or bonding DOT. Details on how to do this can be found in the [Polkadot Wiki](https://wiki.polkadot.network/docs/en/maintain-guides-how-to-validate-polkadot).
 
