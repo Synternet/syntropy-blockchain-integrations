@@ -1,0 +1,19 @@
+---
+name: syntropy-polkadot
+topology: p2p
+state: present
+connections:
+  "{{validator_endpoint}}":
+    state: present
+    type: endpoint
+    services:
+      - node-exporter
+      - polkadot-validator
+    connect_to:
+      "{{monitoring_endpoint}}":
+        type: endpoint
+        services:
+          - prometheus
+          - nginx-proxy
+          - letsencrypt-nginx
+          - grafana

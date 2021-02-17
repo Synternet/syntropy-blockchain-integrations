@@ -1,0 +1,11 @@
+---
+- name: Create Syntropy Polkadot network
+  syntropynet.syntropy.syntropy_template:
+    template_path: "{{ playbook_dir }}/roles/create_syntropy_network/templates/syntropy_polkadot.yaml"
+    template_params:
+      validator_endpoint: "polkadot-validator"
+      monitoring_endpoint: "polkadot-monitoring"
+  register: result
+  retries: 3
+  until: result is success
+  delay: 10

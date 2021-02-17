@@ -1,0 +1,8 @@
+---
+- name: Deploy Polkadot Validator
+  hosts: validator
+  vars:
+    network_name: "syntropynet"
+    validator_node_name: "VALID8OR" # <=== Change this to the name you want your Validator to appear as on the Polkadot network
+  roles:
+    - launch_validator

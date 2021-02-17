@@ -1,0 +1,8 @@
+---
+- hosts: localhost
+  connection: local
+
+- name: Deploy network
+  hosts: localhost
+  roles:
+    - create_syntropy_network

@@ -1,0 +1,43 @@
+
+### Validator
+[validator]
+polkadot-validator ansible_host=${validator_ip} ansible_user=ubuntu  subnet="172.20.0.0/24" provider=1
+
+[validator:vars]
+ansible_user=ubuntu
+# Preferably use a private telemetry server
+loggingFilter='sync=warn,afg=warn,babe=warn'
+
+[monitoring]
+polkadot-monitoring ansible_host=${monitoring_ip} ansible_user=root subnet="172.21.0.0/24" provider=6
+
+# ## Common variables
+[all:vars]
+ansible_connection=ssh
+# The name for how each node should be prefixed for the telemetry name
+project=syntropy-polkadot
+
+ansible_ssh_common_args='-o StrictHostKeyChecking=no -o ConnectTimeout=15'
+build_dir=$HOME/.config/polkadot-secure-validator/build/w3f/ansible
+
+# Specify which `polkadot` binary to install. Checksum is verified during execution.
+polkadot_binary_url='https://github.com/w3f/polkadot/releases/download/v0.8.26-1/polkadot'
+polkadot_binary_checksum='sha256:b48046252241da544fd56ee9cc286959daba759a5c68f4a7b94f068e5c25f235'
+
+polkadot_network_id=polkadot
+chain=polkadot
+
+# Node exporter settings
+# node_exporter_enabled='true'
+# node_exporter_user='node_exporter_user'
+# node_exporter_password='node_exporter_password'
+# node_exporter_binary_url='https://github.com/prometheus/node_exporter/releases/download/v1.1.0/node_exporter-1.1.0.linux-amd64.tar.gz'
+# node_exporter_binary_checksum='sha256:a894a85c58388b318843a586ca7540c1c772990ac5327e0c02e10db722f55a22'
+
+# Polkadot service restart settings. Enabled to restart every hour.
+polkadot_restart_enabled='true'
+polkadot_restart_minute='0'
+polkadot_restart_hour='*'
+polkadot_restart_day='*'
+polkadot_restart_month='*'
+polkadot_restart_weekday='*'

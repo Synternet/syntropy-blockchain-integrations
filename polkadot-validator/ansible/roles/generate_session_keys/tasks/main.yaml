@@ -1,0 +1,40 @@
+---
+- name: get the username running the deploy
+  become: false
+  command: whoami
+  register: host_username
+
+- name: check if keys already exist
+  shell: |
+    set -o pipefail
+    if [ -d /home/{{host_username.stdout}}/polkadot/.local/share/polkadot/chains/polkadot/keystore ]; then
+      ls /home/{{host_username.stdout}}/polkadot/.local/share/polkadot/chains/polkadot/keystore -1U | wc -l
+    else
+      mkdir -p /home/{{host_username.stdout}}/polkadot/.local/share/polkadot/chains/polkadot/
+      chown -R {{host_username.stdout}}:{{host_username.stdout}} /home/{{host_username.stdout}}/polkadot/.local/share/polkadot
+      echo 0
+    fi
+  args:
+    executable: /bin/bash
+  register: keystore_files
+  changed_when: False
+
+- debug:
+    msg: "{{ keystore_files }}"
+
+- name: initialize server keys
+  shell: |
+    docker exec polkadot-validator curl -H "Content-Type: application/json" -d '{"id":1, "jsonrpc":"2.0", "method": "author_rotateKeys", "params":[]}' http://localhost:9933
+  when: keystore_files.stdout == "0"
+  register: rotate_keys
+
+- name: show rotateKeys output
+  debug:
+    var: rotate_keys.stdout
+  when: keystore_files.stdout == "0"
+
+- name: save rotateKeys output
+  copy:
+    content: "{{ rotate_keys.stdout }}"
+    dest: "/home/{{host_username.stdout}}/rotate_keys.log"
+  when: keystore_files.stdout == "0"

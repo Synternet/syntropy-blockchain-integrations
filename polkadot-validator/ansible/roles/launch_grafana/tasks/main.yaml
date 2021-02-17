@@ -1,0 +1,18 @@
+---
+# launch grafana
+- name: Run grafana
+  docker_container:
+    name: grafana
+    image: grafana/grafana
+    state: started
+    purge_networks: yes
+    env:
+      VIRTUAL_HOST: "{{duck_dns_domain}}"
+      VIRTUAL_PORT: "3000"
+      LETSENCRYPT_HOST: "{{duck_dns_domain}}"
+      LETSENCRYPT_EMAIL: "{{letsencrypt_email}}"
+      GF_SECURITY_ADMIN_USER: "{{grafana_login}}"
+      GF_SECURITY_ADMIN_PASSWORD: "{{grafana_password}}"
+      GF_USERS_ALLOW_SIGN_UP: "false"
+    networks:
+      - name: syntropynet

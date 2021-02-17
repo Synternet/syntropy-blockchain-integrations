@@ -1,0 +1,27 @@
+---
+- name: Create data directory if it doesn't exist
+  command: mkdir -p ./polkadot/.local
+
+- name: Create data directory if it doesn't exist
+  command: mkdir -p ./data
+
+- name: Launch Polkadot validator
+  docker_container:
+    image: parity/polkadot:latest
+    name: polkadot-validator
+    purge_networks: true
+    command:
+      - "--validator"
+      - "--name={{validator_node_name}}"
+      - "--prometheus-port=9615"
+      - "--prometheus-external"
+    volumes:
+      - "./data:/data"
+      - "./polkadot:/polkadot"
+    ports:
+      - "30333:30333"
+    exposed_ports:
+      - "9615"
+      - "9933"
+    networks:
+      - name: "{{network_name}}"

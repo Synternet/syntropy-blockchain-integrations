@@ -1,0 +1,18 @@
+---
+- name: Provision the hosts by install Docker, Wireguard and python deps
+  import_playbook: provision_hosts.yaml
+
+- name: Create Docker networks and Deploy the syntropy Agent
+  import_playbook: deploy_syntropy_agents.yaml
+
+- name: Deploy the node exporter to the Validator VM
+  import_playbook: deploy_exporter.yaml
+
+- name: Deploy the Polkadot validator
+  import_playbook: deploy_validator.yaml
+
+- name: Deploy the Prometheus + Grafana monitoring stack
+  import_playbook: deploy_monitoring.yaml
+
+- name: Create Syntropy Network
+  import_playbook: deploy_monitoring.yaml

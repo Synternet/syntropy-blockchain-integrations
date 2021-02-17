@@ -1,0 +1,10 @@
+---
+- name: Deploy Monitoring
+  hosts: [monitoring]
+  vars:
+    network_name: "syntropynet"
+  roles:
+    - launch_nginx_proxy
+    - launch_letsencrypt_companion
+    - launch_prometheus
+    - launch_grafana
