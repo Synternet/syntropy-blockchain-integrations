@@ -119,12 +119,16 @@ cd polkadot-validator
 
 2. Prepare the Syntropy Stack (as shown above)
 
-3. Prepare the Terraform templates (as shown above).
-
-4. Create your infrastructure plan (you'll need to enter a value of `yes` after running this command).
+3. Prepare the Terraform templates (as shown above) and initialize Terraform.
 
 ```
 cd terraform
+terraform init
+```
+
+4. Create your infrastructure plan.
+
+```
 terraform plan
 ```
 

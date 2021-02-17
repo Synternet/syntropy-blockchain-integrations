@@ -1,5 +1,12 @@
 ---
 # launch grafana
+
+- name: Create persistent storage directory
+  file:
+    path: ~/data/grafana
+    state: directory
+    mode: "0755"
+
 - name: Run grafana
   docker_container:
     name: grafana
@@ -14,5 +21,7 @@
       GF_SECURITY_ADMIN_USER: "{{grafana_login}}"
       GF_SECURITY_ADMIN_PASSWORD: "{{grafana_password}}"
       GF_USERS_ALLOW_SIGN_UP: "false"
+    volumes:
+      - ~/data/grafana:/var/lib/grafana
     networks:
       - name: syntropynet
