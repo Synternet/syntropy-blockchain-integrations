@@ -1,0 +1,7 @@
+---
+- name: Deploy Exporter
+  hosts: [validator]
+  vars:
+    network_name: "syntropynet"
+  roles:
+    - launch_node_exporter

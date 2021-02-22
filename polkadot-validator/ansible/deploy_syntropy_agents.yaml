@@ -1,0 +1,12 @@
+---
+- name: Deploy Syntropy Agents
+  hosts: [all]
+  vars:
+    agent_name: "{{inventory_hostname}}"
+    agent_tags: "polkadot"
+    network_name: "syntropynet"
+    subnet: "{{hostvars[inventory_hostname].subnet}}"
+    agent_provider: "{{hostvars[inventory_hostname].provider}}"
+  roles:
+    - create_docker_network
+    - launch_syntropy_agent

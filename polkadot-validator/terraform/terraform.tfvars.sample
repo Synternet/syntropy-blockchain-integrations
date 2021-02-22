@@ -1,0 +1,6 @@
+# AWS
+ssh_public_key_file      =  "~/.ssh/polkadot_validator_rsa.pub" # <=== change to your key location
+
+# Digital Ocean
+do_token                = "YOUR_ACCESS_TOKEN_HERE"
+pvt_key                 = "~/.ssh/polkadot_validator_rsa" # <=== change to your key location

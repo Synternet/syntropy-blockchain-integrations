@@ -19,4 +19,4 @@ This repository is part of a [Syntropy Builders program](https://www.syntropysta
 
 Syntropy Builders is a community enablement program for our most dedicated developer contributors. The program takes place in established working groups led by Syntropy’s developers and engineers.
 
-We are open for your contributions to new gaming integrations and use cases. Let’s talk on [Discord](https://discord.gg/NVjTeRGqKb).
+We are open for your contributions to new integrations and use cases. Let’s talk on [Discord](https://discord.gg/NVjTeRGqKb).
