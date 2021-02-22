@@ -1,0 +1,30 @@
+---
+name: syntropy_elrond
+state: present
+topology: p2m
+connections:
+  monitoring_node:
+    connect_to:
+      elrond_nodes:
+        type: tag
+        services:
+          - elrond-node 
+          - node-exporter
+    state: present
+    type: endpoint 
+    services:
+      - prometheus
+  bastion:
+    connect_to:
+      elrond_nodes:
+        type: tag
+        services:
+          - elrond-node
+          - node-exporter
+      monitoring_node:
+        type: endpoint
+        services:
+          - prometheus
+          - grafana
+    state: present
+    type: endpoint

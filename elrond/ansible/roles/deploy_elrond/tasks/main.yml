@@ -1,0 +1,86 @@
+- block:
+    - name: Create Elrond data directory
+      file:
+        name: /home/elrond/elrond-data/
+        state: directory
+        recurse: yes
+    - name: Create Elrond keys directory
+      file:
+        name: /home/elrond/elrond-data/keys
+        state: directory
+        recurse: yes
+    - name: set SELinux policy to permissive
+      selinux:
+        policy: targeted
+        state: permissive
+      become: yes
+      become_user: root
+    - name: check for Validator keyfile 
+      stat:
+        path: /home/elrond/elrond-data/keys/validatorKey.pem
+      register: validator_stat
+    - name: check for Elrond configuration
+      stat:
+        path: /home/elrond/elrond-data/p2p.toml
+      register: config_stat
+    - name: pull Elrond configuration
+      git:
+        repo: "https://github.com/ElrondNetwork/elrond-config-{{ ELROND_NETWORK_TYPE }}.git"
+        dest: /tmp/elrond-config
+        version: "{{ ELROND_CONFIG_VERSION }}"
+      when: not config_stat.stat.exists
+    - name: copy Elrond configuration
+      copy:
+        src: /tmp/elrond-config/
+        dest: /home/elrond/elrond-data/config
+        remote_src: yes
+        directory_mode: yes
+      when: not config_stat.stat.exists
+    - name: generate Elrond keys
+      community.general.docker_container:
+        name: elrond-keygen
+        image: "elrondnetwork/elrond-go-keygenerator:latest"
+        detach: no
+        entrypoint: "/bin/sh"
+        command: "-c 'cd /data/keys && /go/elrond-go/cmd/keygenerator/keygenerator --key-type validator'" 
+        volumes:
+          - "/home/elrond/elrond-data:/data"
+      when: not validator_stat.stat.exists
+    - name: launch Elrond node
+      community.general.docker_container:
+        name: elrond-node
+        image: "elrondnetwork/elrond-go-node:{{ ELROND_VERSION }}"
+        network_mode: "syntropy_network"
+        networks: 
+          - name: "syntropy_network"
+            ipv4_address: "10.44.2.2"
+        command: "--nodes-setup-file '/data/config/nodesSetup.json' --genesis-file='/data/config/genesis.json' --validator-key-pem-file='/data/keys/validatorKey.pem' --p2p-config='/data/config/p2p.toml' --rest-api-interface 0.0.0.0:8090 --config='/data/config/config.toml' --config-api='/data/config/api.toml' --display-name='{{ NODE_DISPLAY_NAME }}' --port 37373 --use-log-view"
+        volumes:
+          - "/home/elrond/elrond-data:/data"
+          - "/home/elrond/elrond-data/config:/go/elrond-go/cmd/node/config"
+        ports:
+          - "37373:37373/tcp"
+        timeout: 180
+        
+      
+    # - name: Launch Binance Smart Chain node
+    #   community.general.docker_container:
+    #     name: bsc-node
+    #     image: binance/bsc-node
+    #     network_mode: "syntropy_network"
+    #     command: ["--datadir", "/opt/bsc/", "--config", "/opt/bsc/config.yaml", '--rpc', '--rpcaddr', '10.44.2.2', '--rpcport', '8545']
+    #     env:
+    #       SYNTROPY_SERVICE_NAME: "bsc-node"
+    #     volumes:
+    #       - "/home/binance/bsc-data/:/opt/bsc/"
+    #     ports:
+    #       - "30303:30303/tcp"
+    #       - "30303:30303/udp"
+    #     restart_policy: "unless-stopped"
+    #     security_opts:
+    #       - "no-new-privileges"
+    #     ulimits:
+    #       - "nofile:16000:16000"
+    
+  become: yes
+  become_user: elrond

@@ -1,0 +1,24 @@
+- block:
+  - name: add package repositories
+    yum:
+      name: ["epel-release", "elrepo-release"]
+      state: latest
+  # - name: install Yum elrepo plugin
+  #   yum:
+  #     name: yum-plugin-elrepo
+  #     state: latest
+  #   become_user: root
+  - name: install Git
+    yum:
+      name: git
+      state: latest
+  - name: install unzip
+    yum:
+      name: unzip
+      state: latest
+  - name: install Wireguard
+    yum:
+      name: ["kmod-wireguard", "wireguard-tools"]
+      state: latest
+  become: yes
+  become_user: root

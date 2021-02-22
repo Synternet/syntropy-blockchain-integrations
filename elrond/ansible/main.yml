@@ -1,0 +1,103 @@
+- name: bootstrap nodes
+  hosts: common
+  roles:
+    - common_setup
+    - docker
+- name: add user to Docker group
+  hosts: monitoring
+  tasks:
+  - name: add monitoring user to Docker group
+    user:
+      name: elrond 
+      groups: docker
+      append: true
+    become: yes
+    become_user: root
+  - name: reset ssh connection
+    meta: reset_connection
+- name: configure Node firewall
+  hosts: node
+  tasks:
+  - name: add UDP ports
+    command: firewall-cmd --add-port=0-65535/udp --permanent --zone=public
+  - name: add P2P port
+    command: firewall-cmd --add-port=38383/tcp --permanent --zone=public
+  - name: reload Firewall
+    command: firewall-cmd --reload
+- name: create Docker networks
+  hosts: common
+  roles:
+    - create_docker_network
+  vars:
+    subnet: "10.44.{{ play_hosts.index(inventory_hostname) | int + 1 }}.0/24"
+- name: launch Syntropy Agent on localhost
+  hosts: localhost
+  roles:
+    - deploy_agent
+  vars:
+    SYNTROPY_API_KEY: "{{ SYNTROPY_AGENT_API_KEY }}"
+    SYNTROPY_TAGS: "elrond_nodes"
+    SYNTROPY_AGENT_NAME: "bastion"
+    SYNTROPY_PROVIDER: ""
+  vars_files:
+    - vars/main.yml
+- name: launch Syntropy Agent on Elrond node
+  hosts: node
+  roles:
+    - deploy_agent
+  vars:
+    SYNTROPY_API_KEY: "{{ SYNTROPY_AGENT_API_KEY }}"
+    SYNTROPY_TAGS: "elrond_nodes"
+    SYNTROPY_AGENT_NAME: "elrond_node_{{ groups['node'].index(inventory_hostname) }}"
+    SYNTROPY_PROVIDER: "16"
+  vars_files:
+    - vars/main.yml
+- name: launch Syntropy Agent on Monitoring node
+  hosts: monitoring
+  roles:
+    - deploy_agent
+  vars:
+    SYNTROPY_API_KEY: "{{ SYNTROPY_AGENT_API_KEY }}"
+    SYNTROPY_TAGS: "monitoring"
+    SYNTROPY_AGENT_NAME: "monitoring_node"
+    SYNTROPY_PROVIDER: "3"
+  vars_files:
+    - vars/main.yml
+- name: Create Elrond account on Elrond node
+  hosts: node
+  tasks:
+    - name: create Elrond user
+      user:
+        name: elrond
+        shell: /bin/bash
+        groups:
+          - docker
+- name: deploy Elrond 
+  hosts: node 
+  roles:
+    - deploy_elrond
+  vars_files:
+    - vars/main.yml
+- name: deploy monitoring
+  hosts: monitoring
+  roles:
+    - deploy_prometheus
+    - deploy_grafana
+  vars_files:
+    - vars/main.yml
+- name: deploy Node exporter
+  hosts: node
+  roles:
+    - deploy_node_exporter
+  vars_files:
+    - vars/main.yml
+- name: create Syntropy Elrond network
+  hosts: localhost
+  roles:
+    - syntropy_elrond_network
+  vars:
+    SYNTROPY_CONTROLLER_URL: "{{ SYNTROPY_CONTROLLER_URL }}"
+    SYNTROPY_USERNAME: "{{ SYNTROPY_USERNAME }}"
+    SYNTROPY_PASSWORD: "{{ SYNTROPY_PASSWORD }}"
+  vars_files:
+    - vars/main.yml
