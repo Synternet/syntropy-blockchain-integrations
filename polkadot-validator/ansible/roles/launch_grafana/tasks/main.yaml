@@ -1,4 +1,10 @@
 ---
+- name: Create data directory if it doesn't exist
+  file:
+    path: ~/grafana_data
+    state: directory
+    mode: 0777
+
 # launch grafana
 - name: Run grafana
   docker_container:
@@ -14,5 +20,7 @@
       GF_SECURITY_ADMIN_USER: "{{grafana_login}}"
       GF_SECURITY_ADMIN_PASSWORD: "{{grafana_password}}"
       GF_USERS_ALLOW_SIGN_UP: "false"
+    volumes:
+      - ~/grafana_data:/var/lib/grafana
     networks:
       - name: syntropynet

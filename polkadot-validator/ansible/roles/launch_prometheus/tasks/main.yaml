@@ -8,6 +8,12 @@
     src: prometheus.yml # <====== from your secrets.yml
     dest: "~/prometheus.yml" # <====== from your secrets.yml
 
+- name: Create data directory if it doesn't exist
+  file:
+    path: ~/prometheus_data
+    state: directory
+    mode: 0777
+
 # launch prometheus
 - name: prometheus
   docker_container:
@@ -17,5 +23,6 @@
     purge_networks: yes
     volumes:
       - ~/prometheus.yml:/etc/prometheus/prometheus.yml
+      - ~/prometheus_data:/prometheus
     networks:
       - name: "{{network_name}}"
