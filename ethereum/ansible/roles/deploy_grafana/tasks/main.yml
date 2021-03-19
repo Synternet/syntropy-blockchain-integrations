@@ -1,0 +1,43 @@
+- name: create Grafana main config directory
+  file:
+    path: "/home/ethereum/grafana-conf/"
+    state: directory
+- name: create Grafana config directories
+  file:
+    path: "/home/ethereum/grafana-conf/{{item}}"
+    state: directory
+  with_items:
+    - "dashboards"
+    - "datasources"
+- name: Copy Grafana datasource
+  copy:
+    src: files/prometheus_datasource.yml
+    dest: /home/ethereum/grafana-conf/datasources/datasource.yml
+- name: Copy Grafana providers
+  copy:
+    src: files/dashboard.yml
+    dest: /home/ethereum/grafana-conf/dashboards/dashboard.yml
+- name: Copy Grafana dashboard
+  copy:
+    src: files/ethereum_dashboard.json
+    dest: /home/ethereum/grafana-conf/dashboards/ethereum_dashboard.json
+- name: Copy Grafana node-exporter dashboard
+  copy:
+    src: files/node_exporter.json
+    dest: /home/ethereum/grafana-conf/dashboards/node_exporter.json
+- name: run Grafana container
+  docker_container:
+    name: grafana
+    image: bitnami/grafana:latest
+    state: started
+    purge_networks: yes
+    env:
+      GF_SECURITY_ADMIN_USER: "{{ GRAFANA_USERNAME }}"
+      GF_SECURITY_ADMIN_PASSWORD: "{{ GRAFANA_PASSWORD }}"
+      GF_USERS_ALLOW_SIGN_UP: "false"
+    volumes:
+      - "/home/ethereum/grafana-conf/:/opt/bitnami/grafana/conf/provisioning"
+    network_mode: "syntropy_network"
+    networks:
+      - name: syntropy_network
+        ipv4_address: "10.44.1.3"

@@ -1,0 +1,15 @@
+- name: deploy Node exporter
+  docker_container:
+    name: node-exporter
+    image: quay.io/prometheus/node-exporter:latest
+    hostname: node-exporter
+    purge_networks: yes
+    restart: true
+    volumes:
+      - "/:/host:ro,rslave"
+    command:
+      - "--path.rootfs=/host"
+    network_mode: "syntropy_network"
+    networks:
+      - name: syntropy_network
+        ipv4_address: "10.44.2.3"

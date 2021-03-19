@@ -1,0 +1,20 @@
+- name: create Prometheus directory
+  file:
+    name: /home/ethereum/prometheus/
+    state: directory
+- name: copy Prometheus config
+  copy:
+    src: prometheus.yml
+    dest: /home/ethereum/prometheus/prometheus.yml
+- name: deploy Prometheus container
+  docker_container:
+    name: prometheus
+    image: prom/prometheus:latest
+    hostname: prometheus
+    purge_networks: yes
+    volumes:
+      - /home/ethereum/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+    network_mode: "syntropy_network"
+    networks:
+      - name: syntropy_network
+        ipv4_address: "10.44.1.2"

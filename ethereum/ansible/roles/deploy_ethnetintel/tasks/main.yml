@@ -1,0 +1,28 @@
+- name: deploy Ethereum Netstats Frontend container
+  docker_container:
+    name: netstats-frontend
+    image: kamael/eth-netstats:latest
+    hostname: netstats-frontend
+    network_mode: "syntropy_network"
+    networks:
+      - name: syntropy_network
+        ipv4_address: "10.44.1.5"
+    env:
+      WS_SECRET: "{{ NETSTATS_SECRET }}"
+- name: deploy Ethereum Netstats API container
+  docker_container:
+    name: netstats-api
+    image: settlemint/eth-net-intelligence-api:latest 
+    hostname: netstats-api
+    network_mode: "syntropy_network"
+    networks:
+      - name: syntropy_network
+        ipv4_address: "10.44.1.4"
+    env:
+      RPC_HOST: "10.44.2.2"
+      RPC_PORT: "8545"
+      LISTENING_PORT: "30303"
+      INSTANCE_NAME: "{{ NODE_NAME }}"
+      WS_SERVER: "http://10.44.1.5:3000"
+      WS_SECRET: "{{ NETSTATS_SECRET }}"
+      VERBOSITY: "2"

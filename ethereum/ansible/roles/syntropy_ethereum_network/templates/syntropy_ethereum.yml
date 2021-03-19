@@ -1,0 +1,32 @@
+---
+name: syntropy_ethereum
+state: present
+topology: p2m
+connections:
+  monitoring_node:
+    connect_to:
+      ethereum_nodes:
+        type: tag
+        services:
+          - ethereum-node 
+          - node-exporter
+          - eth-node-exporter
+    state: present
+    type: endpoint 
+    services:
+      - prometheus
+      - netstats-api
+  bastion:
+    connect_to:
+      ethereum_nodes:
+        type: tag
+        services:
+          - ethereum-node
+      monitoring_node:
+        type: endpoint
+        services:
+          - prometheus
+          - grafana
+          - netstats-frontend
+    state: present
+    type: endpoint

@@ -1,0 +1,11 @@
+SYNTROPY_AGENT_API_KEY: "<SYNTROPY_GENERATED_API_KEY>"
+SYNTROPY_CONTROLLER_URL: "https://controller-prod-server.syntropystack.com"
+SYNTROPY_USERNAME: "<YOUR_SYNTROPY_USERNAME>"
+SYNTROPY_PASSWORD: "<YOUR_SYNTROPY_PASSWORD>"
+GRAFANA_USERNAME: "<GRAFANA_USERNAME>"
+GRAFANA_PASSWORD: "<RANDOM_GRAFANA_PASSWORD>"
+NETSTATS_SECRET: "syntropyrules321" # generate a strong random secret string
+NODE_NAME: "syntropy" # this is the node name that will show up in eth-netstats
+GETH_SYNC_MODE: "light" # choose sync mode depending on your machine and data needs
+GETH_API_FLAGS: "eth,web3,personal,net" # do not change this unless you need more access in the HTTP API
+GETH_EXTRA_FLAGS: "" # add any additional Geth flags here

@@ -1,0 +1,12 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+scrape_configs:
+  - job_name: "ethereum-node-metrics"
+    static_configs:
+      - targets: ["10.44.2.4:9090"]
+  - job_name: "ethereum-machine-exporter"
+    scrape_interval: 5s
+    static_configs:
+      - targets: ["10.44.2.3:9100"]

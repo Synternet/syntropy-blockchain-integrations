@@ -1,0 +1,35 @@
+- block:
+    - name: Create Ethereum data directory
+      file:
+        name: /home/ethereum/ethereum-data/
+        state: directory
+        recurse: yes
+    - name: set SELinux policy to permissive
+      selinux:
+        policy: targeted
+        state: permissive
+      become: yes
+      become_user: root
+    - name: launch Ethereum docker container
+      community.general.docker_container:
+        name: ethereum-node
+        image: "ethereum/client-go:latest"
+        command: "--syncmode {{ GETH_SYNC_MODE }} --http --http.port 8545 --http.corsdomain * --http.addr '0.0.0.0' --http.api {{ GETH_API_FLAGS }} --identity {{ NODE_NAME }} {{ GETH_EXTRA_FLAGS }}"
+        volumes:
+          - "/home/ethereum/ethereum-data:/root"
+        network_mode: "syntropy_network"
+        networks: 
+          - name: "syntropy_network"
+            ipv4_address: "10.44.2.2"
+    - name: launch Ethereum exporter docker container
+      community.general.docker_container:
+        name: eth-node-exporter
+        image: "hunterlong/gethexporter:latest"
+        network_mode: "syntropy_network"
+        networks:
+          - name: "syntropy_network"
+            ipv4_address: "10.44.2.4"
+        env:
+          GETH: "http://10.44.2.2:8545"
+  become: yes
+  become_user: ethereum
