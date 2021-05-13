@@ -8,4 +8,4 @@ pyyaml==5.4             # via -r requirements.in, syntropynac
 six==1.15.0               # via python-dateutil, syntropy-sdk
 syntropy-sdk==0.1.0       # via -r requirements.in, syntropynac
 syntropynac==0.1.0        # via -r requirements.in
-urllib3==1.26.2           # via syntropy-sdk
+urllib3==1.26.4           # via syntropy-sdk
