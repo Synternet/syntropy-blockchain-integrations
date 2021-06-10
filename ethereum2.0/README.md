@@ -24,20 +24,6 @@ There are some prerequisites to use this example:
 * Terraform and Ansible >= 2.10 installed on your local machine
 * A Linux machine to run the Ansible playbook
 
-## Installation
-
-For this example, you will need the Syntropy Stack ansible collection
-and its dependencies. To install them run:
-
-```
-ansible-galaxy collection install git@github.com:SyntropyNet/syntropy-ansible-collection.git
-```
-
-To install the collection's dependencies, navigate into the collection directory
-and run:
-```
-pip3 install -U -r requirements.txt
-```
 
 ## Variables
 
@@ -85,15 +71,18 @@ This can take a while, since a lot is done in this playbook (takes about 15-20 m
 
 ## Checkout the network setup on Syntropy Platform
 
-If configured correctly, the network layout should be simple and look like this:
+If the script has executed completely, the endpoints will be visible on your Syntropy Stack UI.
 
-![](assets/syntropy_network.png)
+![](assets/endpoints.png)
+
+Then you can connect your endpoints and activate services in order to achieve a properly working blockchain network.
+
+![](assets/network.png)
 
 ## Visiting the monitoring site
 
-You can visit the Grafana instance with the link `http://10.44.1.3:3000` and entering
+You can visit the Grafana instance with the link `http://10.50.1.3:3000` and entering
 the credentials you entered in the `vars/main.yml` file.
 
-After logging in, you should be able to visit the two dashboards (Ethereum node and machine info):
-![](assets/eth_node_grafana.png)
-![](assets/node_grafana.png)
+After logging in, you should be able to visit the your grafana dashboard:
+![](assets/grafana.png)

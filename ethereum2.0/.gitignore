@@ -5,3 +5,4 @@ terraform.tfstate
 .terraform
 .terraform.lock.hcl
 terraform.tfstate.backup
+vars/main.yml
