@@ -1,0 +1,7 @@
+ssh_public_key_file  = "/Users/paulius/.ssh/id_rsa.pub"
+linode_region        = "eu-west"
+linode_token         = "908290551ba80621dae0db07d0f5a7e4fa537be61436c7b12f811ca34f6eb64e"
+gcp_project_id       = "rich-chiller-306016"
+gcp_credentials_file = "../rich-chiller-306016-6b85d58a7aa6.json"
+gcp_region           = "europe-west3"
+gcp_zone             = "europe-west3-b"

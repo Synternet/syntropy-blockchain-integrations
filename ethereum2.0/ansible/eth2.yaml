@@ -1,0 +1,87 @@
+- name: General setup and install docker
+  hosts: all
+  become: yes
+  become_user: root
+  roles:
+    - general
+    - docker
+
+- name: add user to Docker group
+  hosts: monitoring
+  become: yes
+  become_user: root
+  tasks:
+  - name: add monitoring user to Docker group
+    user:
+      name: ethereum
+      groups: docker
+      append: true
+    become: yes
+    become_user: root
+
+#- name: configure Node firewall
+#  hosts: node
+#  become: yes
+#  become_user: root
+#  tasks:
+##  - name: add UDP ports
+ #   command: firewall-cmd --add-port=0-65535/udp --permanent --zone=public
+  # - name: add P2P port
+  #   command: firewall-cmd --add-port=38383/tcp --permanent --zone=public
+  #- name: reload Firewall
+  #  command: firewall-cmd --reload
+
+- name: Deploy Syntropy agent on eth node
+  hosts: node
+  become: yes
+  become_user: root
+  roles: 
+    - deploy_agent
+  vars:
+    SYNTROPY_API_KEY: "{{ SYNTROPY_API_KEY }}"
+    SYNTROPY_AGENT_NAME: "{{ SYNTROPY_AGENT_NAME_E  }}"   
+    SYNTROPY_PROVIDER: "{{ SYNTROPY_PROVIDER_E  }}"
+  vars_files:
+    - vars/main.yml
+
+- name: Deploy Syntropy agent on monitoring node
+  hosts: monitoring
+  become: yes
+  become_user: root
+  roles: 
+    - deploy_agent
+  vars:
+    SYNTROPY_API_KEY: "{{ SYNTROPY_API_KEY_ }}"
+    SYNTROPY_AGENT_NAME: "{{ SYNTROPY_AGENT_NAME_M  }}"   
+    SYNTROPY_PROVIDER: "{{ SYNTROPY_PROVIDER_M  }}"
+  vars_files:
+    - vars/main.yml
+
+- name: Deploy ethereum protocol 1.0 on the node
+  hosts: node
+  become: yes
+  become_user: root
+  roles:
+    - deploy_eth2
+  vars_files:
+    - vars/main.yml
+
+- name: Configure validator
+  hosts: node
+  become: yes
+  become_user: root
+  roles:
+    - deploy_validator
+  vars_files:
+    - vars/main.yml
+
+- name: Deploy monitoring
+  hosts: monitoring
+  become: yes
+  become_user: root
+  roles:
+    - deploy_prometheus
+    - deploy_grafana
+  vars_files:
+    - vars/main.yml
+    
