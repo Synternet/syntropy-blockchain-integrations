@@ -16,7 +16,7 @@
 - name: Upload wallet password
   copy:
     dest: "/home/ubuntu/password.txt"
-    content: "{{ PASSWORD }}"
+    content: "{{PASSWORD}}"
 
 - name: Import validator account into Prysm
   docker_container:
@@ -46,7 +46,7 @@
       - "/home/ubuntu/password.txt:/password"
     command: "--beacon-rpc-provider=beacon-node:4000 --wallet-dir=/wallet --datadir=/validatorDB --wallet-password-file=/password --accept-terms-of-use --pyrmont"
 
-- name: Remove password file
-  ansible.builtin.file:
-    path: /home/ubuntu/password.txt
-    state: absent
+#- name: Remove password file
+#  ansible.builtin.file:
+#    path: /home/ubuntu/password.txt
+#    state: absent

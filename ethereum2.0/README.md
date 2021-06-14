@@ -1,6 +1,6 @@
 # Setup a secure Ethereum2.0 node using the Syntropy Stack
 
-This integration can help exchanges, on-chain data analysts, node runners, etc. setup a secure, stable and monitored Ethereum node.
+This integration can help exchanges, on-chain data analysts, node runners, etc. setup a secure, stable and monitored Ethereum2.0 node.
 The Ansible playbook configure the Ethereum2.0 node and monitoring. To ensure security and stability all of the connections between the Ethereum2.0 node and the monitoring solution are made through a private Syntropy network.
 
 ## Topology
