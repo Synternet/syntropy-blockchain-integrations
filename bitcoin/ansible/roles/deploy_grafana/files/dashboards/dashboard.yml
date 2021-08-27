@@ -1,0 +1,10 @@
+apiVersion: 1
+
+providers:
+- name: 'Prometheus'
+  orgId: 1
+  type: prometheus
+  disableDeletion: false
+  editable: true
+  options:
+    folder: /opt/bitnami/grafana/conf/provisioning/dashboards

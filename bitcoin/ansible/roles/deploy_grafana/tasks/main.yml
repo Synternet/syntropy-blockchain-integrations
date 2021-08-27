@@ -1,0 +1,39 @@
+- name: create Grafana main config directory
+  file:
+    path: "/home/bitcoin/grafana-conf/"
+    state: directory
+- name: create Grafana config directories
+  file:
+    path: "/home/bitcoin/grafana-conf/{{item}}"
+    state: directory
+  with_items:
+    - "dashboards"
+    - "datasources"
+- name: Copy Grafana datasource
+  copy:
+    src: 'datasources/promotheus_datasource.yml'
+    dest: /home/bitcoin/grafana-conf/datasources/datasource.yml
+#- name: Copy Grafana providers
+#  copy:
+#    src: 'dashboards/dashboard.yml'
+#    dest: /home/bitcoin/grafana-conf/dashboards/dashboard.yml
+#- name: Copy Grafana dashboard
+#  copy:
+#    src: 'dashboards/bitcoin-grafana.json'
+#    dest: /home/bitcoin/grafana-conf/dashboards/bitcoin-grafana.json
+- name: run Grafana container
+  docker_container:
+    name: grafana
+    image: bitnami/grafana:latest
+    state: started
+    purge_networks: yes
+    env:
+      GF_SECURITY_ADMIN_USER: "{{ GRAFANA_USERNAME }}"
+      GF_SECURITY_ADMIN_PASSWORD: "{{ GRAFANA_PASSWORD }}"
+      GF_USERS_ALLOW_SIGN_UP: "false"
+    volumes:
+      - "/home/bitcoin/grafana-conf/:/opt/bitnami/grafana/conf/provisioning/"
+    network_mode: "syntropy_network"
+    networks:
+      - name: syntropy_network
+        ipv4_address: "10.50.1.3"

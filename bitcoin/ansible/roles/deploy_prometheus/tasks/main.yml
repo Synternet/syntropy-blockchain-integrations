@@ -1,0 +1,31 @@
+- name: create Docker network
+  docker_network:
+    name: syntropy_network
+    ipam_config:
+      - subnet: 10.50.1.0/24
+  ignore_errors: true
+  retries: 5
+  delay: 5
+  until: result is success
+  register: result
+
+- name: create Prometheus directory
+  file:
+    name: /home/bitcoin/prometheus/
+    state: directory
+- name: copy Prometheus config
+  copy:
+    src: prometheus.yml
+    dest: /home/bitcoin/prometheus/prometheus.yml
+- name: deploy Prometheus container
+  docker_container:
+    name: prometheus
+    image: prom/prometheus:latest
+    hostname: prometheus
+    purge_networks: yes
+    volumes:
+      - /home/bitcoin/prometheus/:/etc/prometheus/
+    network_mode: "syntropy_network"
+    networks:
+      - name: syntropy_network
+        ipv4_address: "10.50.1.2"

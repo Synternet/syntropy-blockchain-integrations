@@ -1,0 +1,67 @@
+- name: General setup and install docker
+  hosts: all
+  become: yes
+  become_user: root
+  roles:
+    - general
+    - docker
+
+- name: add user to Docker group
+  hosts: monitoring
+  become: yes
+  become_user: root
+  tasks:
+  - name: add monitoring user to Docker group
+    user:
+      name: ethereum
+      groups: docker
+      append: true
+    become: yes
+    become_user: root
+
+- name: Deploy Syntropy agent on eth node
+  hosts: node
+  become: yes
+  become_user: root
+  roles: 
+    - deploy_agent
+  vars:
+    SYNTROPY_API_KEY: "{{ SYNTROPY_API_KEY }}"
+    SYNTROPY_AGENT_NAME: "bitcoin_node"   
+    SYNTROPY_PROVIDER: "16"
+  vars_files:
+    - vars/main.yml
+
+- name: Deploy Syntropy agent on monitoring node
+  hosts: monitoring
+  become: yes
+  become_user: root
+  roles: 
+    - deploy_agent
+  vars:
+    SYNTROPY_API_KEY: "{{ SYNTROPY_API_KEY_ }}"
+    SYNTROPY_AGENT_NAME: "monitoring_node"   
+    SYNTROPY_PROVIDER: "3"
+  vars_files:
+    - vars/main.yml
+
+- name: Deploy bitcoin node
+  hosts: node
+  become: yes
+  become_user: root
+  roles:
+    - deploy_node
+    - deploy_node_exporter
+  vars_files:
+    - vars/main.yml
+
+- name: Deploy monitoring
+  hosts: monitoring
+  become: yes
+  become_user: root
+  roles:
+    - deploy_prometheus
+    - deploy_grafana
+  vars_files:
+    - vars/main.yml
+    

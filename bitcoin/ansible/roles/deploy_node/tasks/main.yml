@@ -1,0 +1,33 @@
+- name: create Docker network
+  docker_network:
+    name: syntropy_network
+    ipam_config:
+      - subnet: 10.51.2.0/24
+  ignore_errors: true
+  retries: 5
+  delay: 5
+  until: result is success
+  register: result
+
+- name: create Grafana main config directory
+  file:
+    path: "/home/bitcoin/config/"
+    state: directory
+
+- name: Copy node configuration file
+  copy:
+    src: bitcoin.conf
+    dest: '/home/bitcoin/config/'
+
+- name: launch bitcoin node
+  docker_container:
+    name: "node"
+    image: "jvstein/bitcoin-test-node:latest"
+    command: "-printtoconsole -conf=/etc/bitcoin/bitcoin.conf"
+    volumes:
+      - "/home/bitcoin/config/:/etc/bitcoin/"
+    network_mode: "syntropy_network"
+    networks: 
+      - name: "syntropy_network"
+        ipv4_address: "10.51.2.5"
+    detach: yes
