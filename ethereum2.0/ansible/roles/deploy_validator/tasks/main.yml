@@ -1,0 +1,52 @@
+- name: Upload keys to node
+  copy:
+   src: "{{ VALIDATOR_KEYS_PATH }}"
+   dest: /home/ubuntu/
+
+- name: Upload wallet to node
+  copy:
+   src: "{{ VALIDATOR_WALLET_PATH }}"
+   dest: /home/ubuntu/
+
+- name: Upload validator database to node
+  copy:
+   src: "{{ VALIDATOR_DB }}"
+   dest: /home/ubuntu/
+
+- name: Upload wallet password
+  copy:
+    dest: "/home/ubuntu/password.txt"
+    content: "{{PASSWORD}}"
+
+- name: Import validator account into Prysm
+  docker_container:
+    name: "validator"
+    image: "gcr.io/prysmaticlabs/prysm/validator:stable"
+    volumes:
+      - "/home/ubuntu/prysm-wallet-v2:/wallet"
+      - "/home/ubuntu/validator_keys:/keys"
+    command: "accounts import --keys-dir=/keys --wallet-dir=/wallet --accept-terms-of-use --pyrmont"
+
+- name: Remove validator container
+  docker_container:
+    name: validator
+    state: absent
+
+- name: Run validator
+  docker_container:
+    name: "validator"
+    image: "gcr.io/prysmaticlabs/prysm/validator:stable"
+    network_mode: "syntropy_network"
+    networks: 
+      - name: "syntropy_network"
+        ipv4_address: "10.51.2.6"
+    volumes:
+      - "/home/ubuntu/prysm-wallet-v2:/wallet"
+      - "/home/ubuntu/Eth2/:/validatorDB"
+      - "/home/ubuntu/password.txt:/password"
+    command: "--beacon-rpc-provider=beacon-node:4000 --wallet-dir=/wallet --datadir=/validatorDB --wallet-password-file=/password --accept-terms-of-use --pyrmont"
+
+#- name: Remove password file
+#  ansible.builtin.file:
+#    path: /home/ubuntu/password.txt
+#    state: absent

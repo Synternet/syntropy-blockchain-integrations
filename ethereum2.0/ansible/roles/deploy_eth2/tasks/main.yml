@@ -1,0 +1,27 @@
+- name: create Docker network
+  docker_network:
+    name: syntropy_network
+    ipam_config:
+      - subnet: 10.51.2.0/24
+  ignore_errors: true
+  retries: 5
+  delay: 5
+  until: result is success
+  register: result
+
+- name: launch etHEREUM docker container
+  docker_container:
+    name: "beacon-node"
+    image: "gcr.io/prysmaticlabs/prysm/beacon-chain:stable"
+    command: "--datadir=/data --rpc-host=0.0.0.0 --monitoring-host=0.0.0.0 --http-web3provider=${{ ETHEREUM_NODE_URL }} --pyrmont --accept-terms-of-use"
+    volumes:
+      - "/Users/paulius/.eth2:/data"
+    ports:
+      - "4000:4000"
+      - "13000:13000"
+      - "12000:12000/udp"
+    network_mode: "syntropy_network"
+    networks: 
+      - name: "syntropy_network"
+        ipv4_address: "10.51.2.5"
+    detach: yes
